@@ -2,69 +2,63 @@
 #include <drogon/drogon.h>
 #include <iostream>
 
-bool OrderDao::getProductPriceAndStock(int productId, double &price, int &stock)
+bool OrderDao::createOrderWithTransaction(int userId,
+                                          int productId,
+                                          double &amount)
 {
     try
     {
         auto client = drogon::app().getDbClient();
 
-        auto result = client->execSqlSync(
+        // 创建事务对象
+        auto trans = client->newTransaction();
+
+        // 1. 查询商品价格和库存
+        auto productResult = trans->execSqlSync(
             "SELECT price, stock FROM products WHERE id = ? AND status = 1",
             productId);
 
-        if (result.empty())
+        if (productResult.empty())
         {
+            trans->rollback();
             return false;
         }
 
-        price = result[0]["price"].as<double>();
-        stock = result[0]["stock"].as<int>();
+        amount = productResult[0]["price"].as<double>();
+        int stock = productResult[0]["stock"].as<int>();
 
-        return true;
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << "get product price and stock failed: " << e.what() << std::endl;
-        return false;
-    }
-}
+        if (stock <= 0)
+        {
+            trans->rollback();
+            return false;
+        }
 
-bool OrderDao::decreaseStock(int productId)
-{
-    try
-    {
-        auto client = drogon::app().getDbClient();
-
-        auto result = client->execSqlSync(
+        // 2. 扣减库存
+        auto updateResult = trans->execSqlSync(
             "UPDATE products SET stock = stock - 1 WHERE id = ? AND stock > 0",
             productId);
 
-        return result.affectedRows() > 0;
-    }
-    catch (const std::exception &e)
-    {
-        std::cerr << "decrease stock failed: " << e.what() << std::endl;
-        return false;
-    }
-}
+        if (updateResult.affectedRows() <= 0)
+        {
+            trans->rollback();
+            return false;
+        }
 
-bool OrderDao::createOrder(int userId, int productId, double amount)
-{
-    try
-    {
-        auto client = drogon::app().getDbClient();
-
-        client->execSqlSync(
+        // 3. 创建订单
+        trans->execSqlSync(
             "INSERT INTO orders(user_id, product_id, amount, status) VALUES(?, ?, ?, 0)",
             userId,
             productId,
             amount);
 
+        // 4. 提交事务
+        
+
         return true;
     }
     catch (const std::exception &e)
     {
-        std::cerr << "create order failed: " << e.what() << std::endl;
+        std::cerr << "create order transaction failed: " << e.what() << std::endl;
         return false;
     }
 }

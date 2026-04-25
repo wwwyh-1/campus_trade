@@ -19,28 +19,9 @@ bool OrderService::createOrder(int userId,
 
     OrderDao orderDao;
 
-    double price = 0.0;
-    int stock = 0;
+    double amount = 0.0;
 
-    if (!orderDao.getProductPriceAndStock(productId, price, stock))
-    {
-        message = "product not found";
-        return false;
-    }
-
-    if (stock <= 0)
-    {
-        message = "product stock not enough";
-        return false;
-    }
-
-    if (!orderDao.decreaseStock(productId))
-    {
-        message = "decrease stock failed";
-        return false;
-    }
-
-    if (!orderDao.createOrder(userId, productId, price))
+    if (!orderDao.createOrderWithTransaction(userId, productId, amount))
     {
         message = "create order failed";
         return false;
