@@ -43,3 +43,36 @@ bool UserDao::insertUser(const std::string &username,
         return false;
     }
 }
+bool UserDao::checkLogin(const std::string &username,
+                         const std::string &password,
+                         int &userId)
+{
+    try
+    {
+        auto client = drogon::app().getDbClient();
+
+        auto result = client->execSqlSync(
+            "SELECT id, password FROM users WHERE username = ?",
+            username);
+
+        if (result.empty())
+        {
+            return false;
+        }
+
+        std::string dbPassword = result[0]["password"].as<std::string>();
+
+        if (dbPassword != password)
+        {
+            return false;
+        }
+
+        userId = result[0]["id"].as<int>();
+        return true;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "check login failed: " << e.what() << std::endl;
+        return false;
+    }
+}

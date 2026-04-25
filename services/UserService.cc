@@ -29,3 +29,25 @@ bool UserService::registerUser(const std::string &username,
     message = "register success";
     return true;
 }
+bool UserService::login(const std::string &username,
+                        const std::string &password,
+                        int &userId,
+                        std::string &message)
+{
+    if (username.empty() || password.empty())
+    {
+        message = "username or password is empty";
+        return false;
+    }
+
+    UserDao userDao;
+
+    if (!userDao.checkLogin(username, password, userId))
+    {
+        message = "username or password error";
+        return false;
+    }
+
+    message = "login success";
+    return true;
+}

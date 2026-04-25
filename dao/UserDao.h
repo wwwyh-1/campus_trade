@@ -6,7 +6,12 @@ class UserDao
 {
 public:
     bool isUsernameExists(const std::string &username);
+
     bool insertUser(const std::string &username,
                     const std::string &password,
                     const std::string &phone);
+
+    bool checkLogin(const std::string &username,
+                    const std::string &password,
+                    int &userId);
 };
