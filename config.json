@@ -21,6 +21,18 @@
             "auto_batch": false
         }
     ],
+    "redis_clients": [
+        {
+            "name": "default",
+            "host": "127.0.0.1",
+            "port": 6379,
+            "passwd": "",
+            "db": 0,
+            "is_fast": false,
+            "number_of_connections": 2,
+            "timeout": 5.0
+        }
+    ],
     "app": {
         "threads_num": 4,
         "enable_session": false,
