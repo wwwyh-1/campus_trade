@@ -15,4 +15,12 @@ public:
     Json::Value getProductList();
 
     bool getProductById(int productId, Json::Value &product);
+
+    bool updateProduct(int productId,
+                       const std::string &name,
+                       const std::string &description,
+                       double price,
+                       int stock);
+
+    bool deleteProduct(int productId);
 };

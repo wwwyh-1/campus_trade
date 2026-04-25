@@ -74,3 +74,53 @@ void ProductController::getProductDetail(
 
     callback(HttpResponse::newHttpJsonResponse(resp));
 }
+void ProductController::updateProduct(
+    const HttpRequestPtr &req,
+    std::function<void(const HttpResponsePtr &)> &&callback,
+    int productId)
+{
+    Json::Value resp;
+    auto json = req->getJsonObject();
+
+    if (!json)
+    {
+        resp["code"] = -1;
+        resp["message"] = "invalid json";
+        callback(HttpResponse::newHttpJsonResponse(resp));
+        return;
+    }
+
+    std::string name = (*json)["name"].asString();
+    std::string description = (*json)["description"].asString();
+    double price = (*json)["price"].asDouble();
+    int stock = (*json)["stock"].asInt();
+
+    ProductService productService;
+    std::string message;
+
+    bool ok = productService.updateProduct(
+        productId, name, description, price, stock, message);
+
+    resp["code"] = ok ? 0 : -1;
+    resp["message"] = message;
+
+    callback(HttpResponse::newHttpJsonResponse(resp));
+}
+
+void ProductController::deleteProduct(
+    const HttpRequestPtr &req,
+    std::function<void(const HttpResponsePtr &)> &&callback,
+    int productId)
+{
+    Json::Value resp;
+
+    ProductService productService;
+    std::string message;
+
+    bool ok = productService.deleteProduct(productId, message);
+
+    resp["code"] = ok ? 0 : -1;
+    resp["message"] = message;
+
+    callback(HttpResponse::newHttpJsonResponse(resp));
+}

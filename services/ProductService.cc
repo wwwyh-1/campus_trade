@@ -148,3 +148,100 @@ bool ProductService::getProductById(int productId,
     message = "get product success from mysql";
     return true;
 }
+bool ProductService::updateProduct(int productId,
+                                   const std::string &name,
+                                   const std::string &description,
+                                   double price,
+                                   int stock,
+                                   std::string &message)
+{
+    if (productId <= 0)
+    {
+        message = "invalid product id";
+        return false;
+    }
+
+    if (name.empty())
+    {
+        message = "product name is empty";
+        return false;
+    }
+
+    if (price <= 0)
+    {
+        message = "invalid price";
+        return false;
+    }
+
+    if (stock < 0)
+    {
+        message = "invalid stock";
+        return false;
+    }
+
+    ProductDao productDao;
+
+    if (!productDao.updateProduct(productId, name, description, price, stock))
+    {
+        message = "update product failed";
+        return false;
+    }
+
+    std::string cacheKey = "product:" + std::to_string(productId);
+
+    redisContext *context = redisConnect("127.0.0.1", 6379);
+    if (context != nullptr && context->err == 0)
+    {
+        redisReply *reply = (redisReply *)redisCommand(context, "DEL %s", cacheKey.c_str());
+        if (reply != nullptr)
+        {
+            freeReplyObject(reply);
+        }
+    }
+
+    if (context != nullptr)
+    {
+        redisFree(context);
+    }
+
+    message = "update product success";
+    return true;
+}
+
+bool ProductService::deleteProduct(int productId,
+                                   std::string &message)
+{
+    if (productId <= 0)
+    {
+        message = "invalid product id";
+        return false;
+    }
+
+    ProductDao productDao;
+
+    if (!productDao.deleteProduct(productId))
+    {
+        message = "delete product failed";
+        return false;
+    }
+
+    std::string cacheKey = "product:" + std::to_string(productId);
+
+    redisContext *context = redisConnect("127.0.0.1", 6379);
+    if (context != nullptr && context->err == 0)
+    {
+        redisReply *reply = (redisReply *)redisCommand(context, "DEL %s", cacheKey.c_str());
+        if (reply != nullptr)
+        {
+            freeReplyObject(reply);
+        }
+    }
+
+    if (context != nullptr)
+    {
+        redisFree(context);
+    }
+
+    message = "delete product success";
+    return true;
+}

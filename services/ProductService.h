@@ -18,4 +18,14 @@ public:
     bool getProductById(int productId,
                         Json::Value &product,
                         std::string &message);
+
+    bool updateProduct(int productId,
+                       const std::string &name,
+                       const std::string &description,
+                       double price,
+                       int stock,
+                       std::string &message);
+
+    bool deleteProduct(int productId,
+                       std::string &message);
 };
