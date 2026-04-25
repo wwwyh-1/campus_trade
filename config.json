@@ -1,0 +1,51 @@
+{
+    "listeners": [
+        {
+            "address": "0.0.0.0",
+            "port": 5555,
+            "https": false
+        }
+    ],
+    "db_clients": [
+        {
+            "name": "default",
+            "rdbms": "mysql",
+            "host": "127.0.0.1",
+            "port": 3306,
+            "dbname": "campus_trade",
+            "user": "root",
+            "passwd": "123",
+            "is_fast": false,
+            "number_of_connections": 4,
+            "timeout": 5.0,
+            "auto_batch": false
+        }
+    ],
+    "app": {
+        "threads_num": 4,
+        "enable_session": false,
+        "session_timeout": 0,
+        "document_root": "./",
+        "upload_path": "uploads",
+        "file_types": [
+            "gif",
+            "png",
+            "jpg",
+            "js",
+            "css",
+            "html",
+            "ico",
+            "swf",
+            "xap",
+            "apk",
+            "cur",
+            "xml"
+        ]
+    },
+    "log": {
+        "log_path": "",
+        "logfile_base_name": "",
+        "log_size_limit": 100000000,
+        "log_level": "DEBUG"
+    }
+}
